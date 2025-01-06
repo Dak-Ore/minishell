@@ -101,4 +101,12 @@ void		parse_env(char **env, t_vars *vars);
 void		execute(t_vars *vars);
 int			correct_path(char **env, char *cmd);
 
+void		ft_cd(t_vars *vars, t_exec_data data);
+void		ft_export(t_vars *vars, t_exec_data data);
+void		ft_pwd(t_vars *vars, t_exec_data data);
+void		ft_echo(t_vars *vars, t_exec_data data);
+void		ft_exit(t_vars *vars, t_exec_data data);
+void		ft_env(t_vars *vars, t_exec_data data);
+void		ft_unset(t_vars *vars, t_exec_data data);
+
 #endif
