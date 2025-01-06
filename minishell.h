@@ -6,7 +6,7 @@
 /*   By: rsebasti <rsebasti@student.42perpignan.    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/21 20:52:55 by asene             #+#    #+#             */
-/*   Updated: 2025/01/03 13:53:26 by rsebasti         ###   ########.fr       */
+/*   Updated: 2025/01/06 13:42:55 by rsebasti         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -100,6 +100,7 @@ void		exec_builtin(t_vars *vars, t_exec_data data);
 void		parse_env(char **env, t_vars *vars);
 void		execute(t_vars *vars);
 int			correct_path(char **env, char *cmd);
+int			syntax_check(t_vars *vars);
 
 void		ft_cd(t_vars *vars, t_exec_data data);
 void		ft_export(t_vars *vars, t_exec_data data);

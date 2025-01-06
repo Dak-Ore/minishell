@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   execute.c                                          :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: asene <asene@student.42perpignan.fr>       +#+  +:+       +#+        */
+/*   By: rsebasti <rsebasti@student.42perpignan.    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/26 15:56:53 by asene             #+#    #+#             */
-/*   Updated: 2025/01/06 16:02:44 by asene            ###   ########.fr       */
+/*   Updated: 2025/01/06 14:17:04 by rsebasti         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -75,4 +75,8 @@ void	execute(t_vars *vars)
 		if (vars->current_token->token.type == TOKEN_PIPE)
 			vars->current_token = vars->current_token->next;
 	}
-}
+	else if (vars->current_token->token.type >= TOKEN_PIPE
+		&& vars->current_token->token.type <= TOKEN_HEREDOC)
+			syntax_check(vars);
+		}
+
