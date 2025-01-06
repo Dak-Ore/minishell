@@ -6,7 +6,7 @@
 /*   By: asene <asene@student.42perpignan.fr>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/24 16:49:58 by asene             #+#    #+#             */
-/*   Updated: 2024/12/30 16:34:11 by asene            ###   ########.fr       */
+/*   Updated: 2025/01/06 13:08:11 by asene            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -56,4 +56,18 @@ int	skip_spaces(char **str)
 	while (**str && ft_isspace(**str))
 		(*str)++;
 	return (1);
+}
+
+char	*str_append(char **dest, char *next)
+{
+	unsigned int	new_len;
+	char			*new_str;
+
+	new_len = ft_strlen(*dest) + ft_strlen(next) + 1;
+	new_str = ft_calloc(new_len, sizeof(char));
+	ft_strlcat(new_str, *dest, new_len);
+	ft_strlcat(new_str, next, new_len);
+	free(*dest);
+	*dest = new_str;
+	return (new_str);
 }

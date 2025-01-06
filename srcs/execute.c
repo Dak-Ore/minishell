@@ -6,7 +6,7 @@
 /*   By: asene <asene@student.42perpignan.fr>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/26 15:56:53 by asene             #+#    #+#             */
-/*   Updated: 2024/12/30 17:27:06 by asene            ###   ########.fr       */
+/*   Updated: 2025/01/06 16:02:44 by asene            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -28,29 +28,6 @@ int	end_exec(t_exec_data data, int pid)
 	if (!WIFEXITED(status))
 		return (-2);
 	return (WEXITSTATUS(status));
-}
-
-t_exec_data	build_exec(t_vars *vars)
-{
-	t_exec_data	data;
-	t_list		*lst;
-	t_tokenlist	*t;
-
-	t = vars->current_token;
-	lst = NULL;
-	data.fd_in = 0;
-	data.fd_out = 1;
-	data.path = search_path(vars->env, t->token.value);
-	while (t && (t->token.type == TOKEN_SPACE || t->token.type == TOKEN_WORD))
-	{
-		if (t->token.type == TOKEN_WORD)
-			ft_lstadd_back(&lst, ft_lstnew(ft_strtrim(t->token.value, " ")));
-		t = t->next;
-	}
-	vars->current_token = t;
-	data.args = (char **)list_to_array(lst);
-	ft_lstclear(&lst, NULL);
-	return (data);
 }
 
 pid_t	exec_cmd(t_vars *vars, t_exec_data data)
@@ -81,20 +58,21 @@ void	execute(t_vars *vars)
 	t_exec_data	data;
 
 	vars->current_token = vars->token_list;
-	if (vars->current_token->token.type == TOKEN_WORD)
+	while (vars->current_token->token.type != TOKEN_END)
 	{
-		type = cmd_or_file(vars->current_token->token.value, vars->env);
+		data = build_exec(vars);
+		type = cmd_or_file(data.args[0], vars->env);
 		if (type == W_BUILTIN)
-			exec_builtin(vars);
+			exec_builtin(vars, data);
 		else if (type == W_CMD || type == W_EXECUTABLE)
 		{
-			data = build_exec(vars);
 			g_nal = 1;
 			pid = exec_cmd(vars, data);
 			end_exec(data, pid);
 		}
-		else if (vars->current_token->token.value)
-			ft_fprintf(2, "%s: command not found\n",
-				vars->current_token->token.value);
+		else if (data.args[0])
+			ft_fprintf(2, "%s: command not found\n", data.args[0]);
+		if (vars->current_token->token.type == TOKEN_PIPE)
+			vars->current_token = vars->current_token->next;
 	}
 }

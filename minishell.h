@@ -62,6 +62,7 @@ typedef struct s_exec_data
 {
 	char	*path;
 	char	**args;
+	int		argc;
 	int		fd_in;
 	int		fd_out;
 	int		pipe[0];
@@ -81,8 +82,10 @@ char		*ft_strdoublejoin(char const *s1, char const *s2, char const *s3);
 int			count_line(char **str);
 void		**list_to_array(t_list *lst);
 int			skip_spaces(char **str);
+char		*str_append(char **dest, char *next);
 
 t_tokenlist	*tokenize(char *input);
+char		*grab_word(char **p);
 void		token_append(t_tokenlist **lst, t_token_type type, char *value);
 void		clear_token_list(t_tokenlist **t);
 
@@ -91,7 +94,9 @@ char		*getenv_value(char **env, char *word);
 t_word_type	cmd_or_file(char *token, char **env);
 int			setup_signal(void);
 
-void		exec_builtin(t_vars *vars);
+t_exec_data	build_exec(t_vars *vars);
+
+void		exec_builtin(t_vars *vars, t_exec_data data);
 void		parse_env(char **env, t_vars *vars);
 void		execute(t_vars *vars);
 int			correct_path(char **env, char *cmd);
