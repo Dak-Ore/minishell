@@ -3,16 +3,16 @@
 /*                                                        :::      ::::::::   */
 /*   main.c                                             :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: asene <asene@student.42perpignan.fr>       +#+  +:+       +#+        */
+/*   By: rsebasti <rsebasti@student.42perpignan.    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/21 20:51:51 by asene             #+#    #+#             */
-/*   Updated: 2025/01/06 22:51:22 by asene            ###   ########.fr       */
+/*   Updated: 2025/01/07 13:51:56 by rsebasti         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include <minishell.h>
 
-int	g_nal = 0;
+volatile int	g_nal = 0;
 
 void	analyze_token(t_token *token, char **env)
 {

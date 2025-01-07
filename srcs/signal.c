@@ -3,17 +3,18 @@
 /*                                                        :::      ::::::::   */
 /*   signal.c                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: asene <asene@student.42perpignan.fr>       +#+  +:+       +#+        */
+/*   By: rsebasti <rsebasti@student.42perpignan.    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/26 09:30:16 by rsebasti          #+#    #+#             */
-/*   Updated: 2024/12/30 16:01:58 by asene            ###   ########.fr       */
+/*   Updated: 2025/01/07 15:59:24 by rsebasti         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "minishell.h"
 
-void	handle_signal(int sign)
+void	handle_signal(int sign, siginfo_t *info, void *context)
 {
+	(void) context;
 	if (sign == SIGINT)
 	{
 		if (g_nal != 2)
@@ -28,14 +29,32 @@ void	handle_signal(int sign)
 			g_nal = 0;
 	}
 	if (sign == SIGQUIT)
-		ft_printf("SIQUIT RECU \n");
+	{
+		if (g_nal == 1)
+		{
+			kill(info->si_pid, SIGQUIT);
+			g_nal = 0;
+			ft_fprintf(2, "Quit (core dumped)\n");
+		}
+	}
+
 }
 
 int	setup_signal(void)
 {
-	if (signal(SIGINT, handle_signal) == SIG_ERR)
-		return (perror("Erreur lors de la configuration de SIGINT"), 1);
-	if (signal(SIGQUIT, handle_signal) == SIG_ERR)
-		return (perror("Erreur lors de la configuration de SIGQUIT"), 1);
+	struct sigaction sa;
+
+	sa.sa_sigaction = handle_signal;
+	sa.sa_flags = SA_SIGINFO;
+	sigemptyset(&sa.sa_mask);
+	if (sigaction(SIGINT, &sa, NULL) == -1) {
+        perror("sigaction");
+        return 1;
+    }
+	sa.sa_handler = SIG_IGN;
+	if (sigaction(SIGQUIT, &sa, NULL) == -1) {
+        perror("sigaction");
+        return 1;
+    }
 	return (0);
 }
