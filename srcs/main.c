@@ -6,7 +6,7 @@
 /*   By: asene <asene@student.42perpignan.fr>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/21 20:51:51 by asene             #+#    #+#             */
-/*   Updated: 2025/01/22 21:56:48 by asene            ###   ########.fr       */
+/*   Updated: 2025/01/23 00:34:50 by asene            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -41,31 +41,75 @@ void	init_shell(t_vars *vars, char **env)
 	parse_env(env, vars);
 	update_shell_lvl(vars);
 }
+void	sig_update(void)
+{
+	if (g_nal == SIGINT)
+		ft_putchar_fd('\n', 1);
+	if (g_nal == SIGQUIT)
+		ft_putstr_fd("Quit (core dumped)\n", 1);
+	g_nal = 0;
+}
+
+t_exec_mode	move_to_next(t_token **token)
+{
+	t_exec_mode	mode;
+	t_token		*tmp;
+
+	while (*token && !is_limit_token(**token))
+	{
+		tmp = *token;
+		*token = (*token)->next;
+		(void)tmp; // free token
+	}
+	if (*token)
+	{
+		if ((*token)->type == TOKEN_END)
+			mode = REGULAR;
+		else if ((*token)->type == TOKEN_AND)
+			mode = AND;
+		else if ((*token)->type == TOKEN_OR)
+			mode = OR;
+		*token = (*token)->next;
+		return (mode);
+	}
+	return (REGULAR);
+}
+
+void	prompt_loop(t_vars *vars)
+{
+	char		*input;
+	t_exec_mode	mode;
+
+	mode = REGULAR;
+	sig_update();
+	if (readline_prompt(vars, &input) == NULL)
+		return (free(input), clean_exit(vars, 0));
+	vars->token_list = tokenize(input);
+	free(input);
+	if (!check(vars->token_list))
+		vars->exit_code = 2;
+	else
+	{
+		while (vars->token_list)
+		{
+			if (mode == REGULAR
+				|| (mode == AND && vars->exit_code == 0)
+				|| (mode == OR && vars->exit_code != 0))
+				vars->exit_code = execute(vars);
+			mode = move_to_next(&vars->token_list);
+		}
+		clear_token_list(&vars->token_list);
+	}
+}
 
 int	main(int argc, char **argv, char **env)
 {
-	char	*input;
 	t_vars	vars;
 
 	if (argc > 1)
 		return (ft_fprintf(2, "Usage: %s\n", argv[0]), 1);
 	init_shell(&vars, env);
 	while (1)
-	{
-		if (g_nal == SIGINT)
-			ft_putchar_fd('\n', 1);
-		if (g_nal == SIGQUIT)
-			ft_putstr_fd("Quit (core dumped)\n", 1);
-		g_nal = 0;
-		if (readline_prompt(&vars, &input) == NULL)
-			return (free(input), clean_exit(&vars, 0), 0);
-		vars.token_list = tokenize(input);
-		if (!check(vars.token_list))
-			vars.exit_code = 2;
-		else
-			vars.exit_code = execute(&vars);
-		clear_token_list(&(vars.token_list));
-		free(input);
-	}
+		prompt_loop(&vars);
 	return (0);
 }
