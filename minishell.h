@@ -6,7 +6,7 @@
 /*   By: asene <asene@student.42perpignan.fr>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/21 20:52:55 by asene             #+#    #+#             */
-/*   Updated: 2025/01/21 23:35:17 by asene            ###   ########.fr       */
+/*   Updated: 2025/01/22 21:51:18 by asene            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -125,5 +125,9 @@ void		heredoc_killer(int nbheredoc);
 int			check(t_token *tok_list);
 bool		is_redirection(t_token t);
 bool		is_limit_token(t_token t);
+char		*token_str(t_token *t);
+
+void		file_error(char *file);
+void		syntaxe_error(t_token *token);
 
 #endif

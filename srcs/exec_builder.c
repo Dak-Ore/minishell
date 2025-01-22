@@ -6,7 +6,7 @@
 /*   By: asene <asene@student.42perpignan.fr>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/06 12:45:46 by asene             #+#    #+#             */
-/*   Updated: 2025/01/22 17:06:30 by asene            ###   ########.fr       */
+/*   Updated: 2025/01/22 21:46:48 by asene            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -29,24 +29,16 @@ char	*build_word(t_vars *vars, t_token **lst)
 	char	*tmp;
 
 	value = ft_calloc(1, sizeof(char));
-	while (1)
+	while (*lst)
 	{
 		tmp = eval_string(vars, (*lst)->value);
 		str_append(&value, tmp);
 		free(tmp);
-		if ((*lst)->next->type != TOKEN_WORD)
+		if ((*lst)->next == NULL || ((*lst)->next && (*lst)->next->type != TOKEN_WORD))
 			break ;
 		(*lst) = (*lst)->next;
 	}
 	return (value);
-}
-
-void	file_error(char *file)
-{
-	if (access(file, F_OK) == 0)
-		ft_fprintf(2, "minishell: %s: Permission denied\n", file);
-	else
-		ft_fprintf(2, "minishell: %s: No such file or directory\n", file);
 }
 
 int	get_open_flags(t_token token)
@@ -112,7 +104,7 @@ t_exec	*build_exec(t_vars *vars, t_token *tok_lst, t_exec **data, t_exec *prev)
 	ft_lstclear(&lst, NULL);
 	if ((*data)->args[0])
 		(*data)->path = search_path(vars, (*data)->args[0]);
-	if (tok_lst->type == TOKEN_PIPE)
+	if (tok_lst && tok_lst->type == TOKEN_PIPE)
 		build_exec(vars, tok_lst->next, &(*data)->pipe, *data);
 	return ((*data)->argc = count_line((*data)->args), *data);
 }
