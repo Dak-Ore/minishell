@@ -6,7 +6,7 @@
 /*   By: asene <asene@student.42perpignan.fr>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/24 16:46:54 by asene             #+#    #+#             */
-/*   Updated: 2025/01/21 22:51:02 by asene            ###   ########.fr       */
+/*   Updated: 2025/01/22 17:06:25 by asene            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -67,7 +67,10 @@ void	get_next_token(t_token **list, char **input)
 		type = TOKEN_REDIRECT_IN;
 	if (type != TOKEN_WORD)
 		skip_spaces(input);
-	token_append(list, type, grab_word(input));
+	if (type == TOKEN_WORD)
+		token_append(list, type, grab_word(input));
+	else
+		token_append(list, type, NULL);
 }
 
 t_token	*tokenize(char *input)

@@ -6,7 +6,7 @@
 /*   By: asene <asene@student.42perpignan.fr>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/06 12:45:46 by asene             #+#    #+#             */
-/*   Updated: 2025/01/21 22:45:51 by asene            ###   ########.fr       */
+/*   Updated: 2025/01/22 17:06:30 by asene            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -41,36 +41,49 @@ char	*build_word(t_vars *vars, t_token **lst)
 	return (value);
 }
 
-void	file_error(t_token token)
+void	file_error(char *file)
 {
-	if (access(token.value, F_OK) == 0)
-		ft_fprintf(2, "minishell: %s: Permission denied\n", token.value);
+	if (access(file, F_OK) == 0)
+		ft_fprintf(2, "minishell: %s: Permission denied\n", file);
 	else
-		ft_fprintf(2, "minishell: %s: No such file or directory\n",
-			token.value);
+		ft_fprintf(2, "minishell: %s: No such file or directory\n", file);
 }
 
-void	handle_redirect(t_vars *vars, t_exec *data, t_token token)
+int	get_open_flags(t_token token)
 {
-	int	fd;
-
+	int	flags;
+	
 	if (token.type == TOKEN_REDIRECT_OUT)
-		fd = open(token.value, O_WRONLY | O_CREAT | O_TRUNC, 0644);
+		flags = O_WRONLY | O_CREAT | O_TRUNC;
 	else if (token.type == TOKEN_APPEND)
-		fd = open(token.value, O_WRONLY | O_CREAT | O_APPEND, 0644);
+		flags = O_WRONLY | O_CREAT | O_APPEND;
 	else if (token.type == TOKEN_REDIRECT_IN)
-		fd = open(token.value, O_RDONLY);
+		flags = O_RDONLY;
 	else
-		fd = heredoc(token.value, vars);
+		flags = 0;
+	return (flags);
+}
+
+void	handle_redirect(t_vars *vars, t_exec *data, t_token **tok_lst)
+{
+	int		fd;
+	t_token	current;
+
+	current = **tok_lst;
+	(*tok_lst) = (*tok_lst)->next;
+	if (is_redirection(current) && current.type != TOKEN_HEREDOC)
+		fd = open(build_word(vars, tok_lst), get_open_flags(current), 0644);
+	else
+		fd = heredoc((*tok_lst)->value, vars);
 	if (fd == -1)
-		file_error(token);
-	if (token.type == TOKEN_REDIRECT_OUT || token.type == TOKEN_APPEND)
+		file_error((*tok_lst)->value);
+	if (current.type == TOKEN_REDIRECT_OUT || current.type == TOKEN_APPEND)
 	{
 		if (data->fd_out != 1)
 			close(data->fd_out);
 		data->fd_out = fd;
 	}
-	if (token.type == TOKEN_REDIRECT_IN || token.type == TOKEN_HEREDOC)
+	if (current.type == TOKEN_REDIRECT_IN || current.type == TOKEN_HEREDOC)
 	{
 		if (data->fd_in != 0)
 			close(data->fd_in);
@@ -92,7 +105,7 @@ t_exec	*build_exec(t_vars *vars, t_token *tok_lst, t_exec **data, t_exec *prev)
 		if (tok_lst->type == TOKEN_WORD)
 			ft_lstadd_back(&lst, ft_lstnew(build_word(vars, &tok_lst)));
 		else if (is_redirection(*tok_lst))
-			handle_redirect(vars, *data, *tok_lst);
+			handle_redirect(vars, *data, &tok_lst);
 		tok_lst = tok_lst->next;
 	}
 	(*data)->args = (char **)ft_lst_to_array(lst);
